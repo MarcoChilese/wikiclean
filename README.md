@@ -1,4 +1,4 @@
-WikiClean
+This Repository is a Fork of WikiClean
 =========
 [![Build Status](https://travis-ci.org/lintool/wikiclean.svg?branch=master)](https://travis-ci.org/lintool/wikiclean)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.wikiclean/wikiclean/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.wikiclean/wikiclean)
@@ -59,6 +59,8 @@ Sample command-line invocation to read a Wikipedia dump and output plain text:
 mvn exec:java -Dexec.mainClass=org.wikiclean.WikipediaArticlesDump \
   -Dexec.args="-input enwiki-20161220-pages-articles.xml.bz2" | less
 ```
+
+To genearate the .jar file with all the dependecies and executable from the MainClass, run: ```mvn clean compile assembly:single```
 
 Maven Artifacts
 ---------------

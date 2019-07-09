@@ -154,14 +154,13 @@ public class WikiClean {
     return s2;
   }
 
+
   /**
    * Cleans a Wikipedia article.
-   * @param page Wikipedia article
+   * @param content Wikipedia article text
    * @return cleaned output
    */
-  public String clean(String page) {
-    String content = getWikiMarkup(page);
-
+  public String clean(String content) {
     if (!withFooter) {
       content = removeFooter(content);
     }
@@ -194,10 +193,6 @@ public class WikiClean {
 
     // Finally, fold multiple newlines.
     content = compressMultipleNewlines(content);
-
-    if (withTitle) {
-      return getTitle(page) + "\n\n" + content.trim();
-    }
 
     return content.trim();
   }
