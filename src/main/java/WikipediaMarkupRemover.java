@@ -5,7 +5,6 @@ import org.json.simple.parser.ParseException;
 import org.wikiclean.WikiClean;
 
 import java.io.*;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -53,8 +52,12 @@ class CleanTask implements Runnable{
                 e.printStackTrace();
             }
 
-        } catch (IOException | ParseException e) {
+        } catch (IOException e){
             e.printStackTrace();
+        }
+        catch (ParseException e){
+            System.out.println(jsonfile+" will be ignored and deleted because of a parse error");
+            jsonfile.delete();
         }
     }
 }
