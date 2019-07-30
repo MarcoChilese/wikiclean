@@ -5,8 +5,11 @@ import org.json.simple.parser.ParseException;
 import org.wikiclean.WikiClean;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 // clean compile assembly:single
 
@@ -18,9 +21,13 @@ class CleanTask implements Runnable{
     }
 
     public void run(){
-        try (FileReader reader = new FileReader(jsonfile)){
+        try (InputStream reader = new FileInputStream(jsonfile)){
+            InputStream gzipStream = new GZIPInputStream(reader);
+            Reader decoder = new InputStreamReader(gzipStream, StandardCharsets.UTF_8);
+            BufferedReader buffered = new BufferedReader(decoder);
+
             JSONParser jsonParser = new JSONParser();
-            JSONObject jsonPage = (JSONObject)  jsonParser.parse(reader);
+            JSONObject jsonPage = (JSONObject)  jsonParser.parse(buffered);
 
             JSONArray revisions = (JSONArray) jsonPage.get("Revision");
             WikiClean cleaner = new WikiClean.Builder().build();
@@ -43,10 +50,12 @@ class CleanTask implements Runnable{
                 return;
             }
 
-            try (FileWriter file = new FileWriter(jsonfile.getParent()+"/W"+jsonfile.getName())) {
+            try (FileOutputStream file = new FileOutputStream(jsonfile.getParent()+"/W"+jsonfile.getName())) {
+                try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(file), "UTF-8")) {
+                    writer.write(jsonPage.toJSONString());
+                    writer.flush();
+                }
                 jsonfile.delete();
-                file.write(jsonPage.toJSONString());
-                file.flush();
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -65,7 +74,7 @@ class CleanTask implements Runnable{
 public class WikipediaMarkupRemover {
     public static void main(String[] args) {
         File dir = new File(args[0]);
-        File[] files = dir.listFiles((dir1, name) -> name.endsWith(".json"));
+        File[] files = dir.listFiles((dir1, name) -> name.endsWith(".json.gz"));
 
         ExecutorService myExe = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         for (File jsonfile : files) {
