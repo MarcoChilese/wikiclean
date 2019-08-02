@@ -4,12 +4,12 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wikiclean.WikiClean;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 // clean compile assembly:single
 
@@ -21,21 +21,17 @@ class CleanTask implements Runnable{
     }
 
     public void run(){
-        try (InputStream reader = new FileInputStream(jsonfile)){
-            InputStream gzipStream = new GZIPInputStream(reader);
-            Reader decoder = new InputStreamReader(gzipStream, StandardCharsets.UTF_8);
-            BufferedReader buffered = new BufferedReader(decoder);
-
+        try (FileReader reader = new FileReader(jsonfile)){
             JSONParser jsonParser = new JSONParser();
-            JSONObject jsonPage = (JSONObject)  jsonParser.parse(buffered);
+            JSONObject jsonPage = (JSONObject)  jsonParser.parse(reader);
 
             JSONArray revisions = (JSONArray) jsonPage.get("Revision");
-            WikiClean cleaner = new WikiClean.Builder().build();
+            WikiClean cleaner = new WikiClean.Builder().withFooter(false).withTitle(false).build();
 
             if (revisions != null) {
                 revisions.stream().forEach((x) -> {
                     JSONObject rev = (JSONObject) x;
-                    String content = cleaner.clean((String) rev.get("Text")).replaceAll("[^a-zA-Z ]", "").toLowerCase();
+                    String content = cleaner.clean((String) rev.get("Text")).replaceAll("[^a-zA-Z]", " ").toLowerCase();
 
                     if (content == "")
                         jsonfile.delete();
@@ -50,12 +46,10 @@ class CleanTask implements Runnable{
                 return;
             }
 
-            try (FileOutputStream file = new FileOutputStream(jsonfile.getParent()+"/W"+jsonfile.getName())) {
-                try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(file), "UTF-8")) {
-                    writer.write(jsonPage.toJSONString());
-                    writer.flush();
-                }
+            try (FileWriter file = new FileWriter(jsonfile.getParent()+"/W"+jsonfile.getName())) {
                 jsonfile.delete();
+                file.write(jsonPage.toJSONString());
+                file.flush();
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -74,7 +68,7 @@ class CleanTask implements Runnable{
 public class WikipediaMarkupRemover {
     public static void main(String[] args) {
         File dir = new File(args[0]);
-        File[] files = dir.listFiles((dir1, name) -> name.endsWith(".json.gz"));
+        File[] files = dir.listFiles((dir1, name) -> name.endsWith(".json"));
 
         ExecutorService myExe = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         for (File jsonfile : files) {
