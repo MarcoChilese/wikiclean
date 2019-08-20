@@ -26,12 +26,12 @@ class CleanTask implements Runnable{
             JSONObject jsonPage = (JSONObject)  jsonParser.parse(reader);
 
             JSONArray revisions = (JSONArray) jsonPage.get("Revision");
-            WikiClean cleaner = new WikiClean.Builder().withFooter(false).withTitle(false).build();
+            WikiClean cleaner = new WikiClean.Builder().withFooter(false).withTitle(false).keepLinks(false).build();
 
             if (revisions != null) {
                 revisions.stream().forEach((x) -> {
                     JSONObject rev = (JSONObject) x;
-                    String content = cleaner.clean((String) rev.get("Text")).replaceAll("[^a-zA-Z]", " ").toLowerCase();
+                    String content = cleaner.clean((String) rev.get("Text")).replaceAll("\\p{Punct}", "").toLowerCase();
 
                     if (content == "")
                         jsonfile.delete();

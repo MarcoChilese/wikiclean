@@ -118,7 +118,7 @@ public class ExtractEnWikiLinkGraph {
     PrintWriter writer = new PrintWriter(args.output, "UTF-8");
 
     WikipediaArticlesDump wikipedia = new WikipediaArticlesDump(args.input);
-    WikiClean cleaner = new WikiClean.Builder().keepLinks().build();
+    WikiClean cleaner = new WikiClean.Builder().keepLinks(false).build();
 
     AtomicInteger vertices = new AtomicInteger();
     AtomicInteger edges = new AtomicInteger();
