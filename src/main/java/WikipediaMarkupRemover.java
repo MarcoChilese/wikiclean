@@ -31,7 +31,11 @@ class CleanTask implements Runnable{
             if (revisions != null) {
                 revisions.stream().forEach((x) -> {
                     JSONObject rev = (JSONObject) x;
-                    String content = cleaner.clean((String) rev.get("Text")).replaceAll("\\p{Punct}", "").toLowerCase();
+                    String content = cleaner.clean((String) rev.get("Text"))
+                            .replaceAll("\n", " ")
+                            .replaceAll("(http|https)://[^\\s]+", "")
+                            .replaceAll("\"", " ")
+                            .toLowerCase();
 
                     if (content == "")
                         jsonfile.delete();
