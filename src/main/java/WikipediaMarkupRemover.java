@@ -11,19 +11,22 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static java.lang.System.exit;
+
 // clean compile assembly:single
 
 
-class CleanTask implements Runnable{
+class CleanTask implements Runnable {
     private File jsonfile;
+
     public CleanTask(File jsonfile) {
         this.jsonfile = jsonfile;
     }
 
-    public void run(){
-        try (FileReader reader = new FileReader(jsonfile)){
+    public void run() {
+        try (FileReader reader = new FileReader(jsonfile)) {
             JSONParser jsonParser = new JSONParser();
-            JSONObject jsonPage = (JSONObject)  jsonParser.parse(reader);
+            JSONObject jsonPage = (JSONObject) jsonParser.parse(reader);
 
             JSONArray revisions = (JSONArray) jsonPage.get("Revision");
             WikiClean cleaner = new WikiClean.Builder().withFooter(false).withTitle(false).keepLinks(false).build();
@@ -37,33 +40,28 @@ class CleanTask implements Runnable{
                             .replaceAll("\"", " ")
                             .toLowerCase();
 
-                    if (content == "")
+                    if (content.equals(""))
                         jsonfile.delete();
-                    else{
+                    else {
                         rev.remove("Text");
                         rev.put("Text", content);
                     }
                 });
-            }
-            else {
+            } else {
                 jsonfile.delete();
                 return;
             }
 
-            try (FileWriter file = new FileWriter(jsonfile.getParent()+"/W"+jsonfile.getName())) {
+            try (FileWriter file = new FileWriter(jsonfile.getParent() + "/W" + jsonfile.getName())) {
                 jsonfile.delete();
                 file.write(jsonPage.toJSONString());
-                file.flush();
-
-            } catch (IOException e) {
-                e.printStackTrace();
             }
 
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
-        }
-        catch (ParseException e){
-            System.out.println(jsonfile+" will be ignored and deleted because of a parse error");
+            exit(1);
+        } catch (ParseException e) {
+            System.out.println(jsonfile + " will be ignored and deleted because of a parse error");
             jsonfile.delete();
         }
     }

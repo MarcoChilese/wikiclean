@@ -59,8 +59,10 @@ Sample command-line invocation to read a Wikipedia dump and output plain text:
 mvn exec:java -Dexec.mainClass=org.wikiclean.WikipediaArticlesDump \
   -Dexec.args="-input enwiki-20161220-pages-articles.xml.bz2" | less
 ```
+<br>
 
-To genearate the .jar file with all the dependecies and executable from the MainClass, run: ```mvn clean compile assembly:single```
+### Generating .jar file with dependencies
+For build the .jar file with all the dependencies run: ```mvn clean compile assembly:single```
 
 Maven Artifacts
 ---------------
