@@ -34,7 +34,7 @@ class CleanTask implements Runnable {
             if (revisions != null) {
                 revisions.stream().forEach((x) -> {
                     JSONObject rev = (JSONObject) x;
-                    String content = cleaner.clean((String) rev.get("Text"))
+                    String content = cleaner.clean(((String) rev.get("Text")).replaceAll("[*]", " "))
                             .replaceAll("\n", " ")
                             .replaceAll("(http|https)://[^\\s]+", "")
                             .replaceAll("\"", " ")
